@@ -1,0 +1,4 @@
+Dni|Nombre|Apellidos|Carrera|Mensualidad
+71354857|Howard|Paredes Zegarra|Computacion|1500.00
+76249534|Penny|Vargas Cordero|Industrial|2550.50
+82010068|Sheldon|Cooper Quizpe|Mecatronica|1850.00
