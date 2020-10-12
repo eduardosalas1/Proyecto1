@@ -1,85 +1,108 @@
-#include "Registro.h"
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <ctime>
+#include <tuple>
+#include <string>
+#include <fstream>
+#include "SequentialFile.cpp"
+using namespace std;
 
-void printFiles(const string&);
+int main(){
 
-int main() {
-    string filename = "data.dat";
-    vector<Registro> vec;
-    Registro r;
-    strcpy(r.carrera,"CS");
-    r.ciclo = 5;
-    for (int i = 124; i >= 121; --i){
-        strcpy(r.codigo,to_string(i*10).c_str());
-        vec.push_back(r);
+    /*srand(time(nullptr));
+
+    char nums[10] = {'0','1','2','3','4','5','6','7','8','9'};
+
+    //Dni
+    vector<string> vDni;
+    for(int i = 0; i < 300; i++){//es 300
+        string temp = "";
+        temp = temp +  nums[rand()%10] +  nums[rand()%10] +  nums[rand()%10] +  nums[rand()%10] +  nums[rand()%10] +  nums[rand()%10] +  nums[rand()%10] +  nums[rand()%10];
+        vDni.push_back(temp);
     }
 
-    cout << "================\nInsertar registros\n================\n";
-    cout << "\nCodigos antes de ser agregados al archivo\n\t";
-    for (auto x : vec) cout << x.codigo << " ";
-    cout << endl;
-
-    OrderFileStructure o(filename);
-    o.insertAll(vec);
-
-    ifstream File;
-    File.open(filename,ios::in| ios::binary);
-    Registro record;
-    cout << "Registros despues de ser agregados al archivo\n";
-    while (File >> record) record.detalle();
-    File.close();
-    cout << endl ;
-
-    // Busqueda binaria     ¬---puede cambiar el valor de las keys
-    cout << "================\nBusqueda binaria\n================\n\n";
-    int key1 = stoi(vec[1].codigo), key2 = 0000;
-    cout << "Codigo " << key1 << " ubicado en la posicion ";
-    cout << o.binarySearch(key1, false) << endl;
-    cout << "Codigo " << key2 << " ubicado en la posicion ";
-    cout << o.binarySearch(key2, false) << endl;
-    cout << endl;
-
-    cout << "================\nAgreagar registros\n================\n\n";
-    cout << "Agregar 6 registros adicionales\n";
-    Registro re;
-    strcpy(re.carrera,"CS");
-    re.ciclo = 3;
-    for (int i = 1221; i < 1227; ++i){
-        strcpy(re.codigo,to_string(i).c_str());
-        o.add(re);
+    //Nombre
+    string nombre[30] = {"Alvaro", "Eduardo", "Guillermo", "Wilder", "Miguel", "Gonzalo", "Fernanda", "Maria", "Fiorela", "Carla", "Carlos", "Heider", "Juan", "Jorge", "Valeria", "Chiara", "Ximena", "Ivana", "Cesar", "Paolo", "Paola", "Mario", "Xander", "Johnny", "Kevin", "Jimena", "Andrea", "Marcelo", "Grabiela", "Silvia"};
+    vector<string> vNombre;
+    for(int i = 0; i < 300; i++){
+        string temp2 = "";
+        temp2 += nombre[rand()%30];
+        vNombre.push_back(temp2);
     }
-    printFiles(filename);
 
-    cout << "================\nEliminar registro\n================\n\n";
-    cout << "Eliminar registro de la posicion 1\n";
-    cout << "Eliminacion" << (o.deleter(1) ? "exitosa" : "sin exito");
-    printFiles(filename);
-
-    cout << "================\nPrueba adicional\n================\n\n";
-    cout << "Unir todos los registros en uno solo file luego \nde pasar los 10 registros en el archivo auxiliar\n";
-    cout << "Se insertan 5 registros mas\n";
-    re.ciclo = 6;
-    for (int i = 1231; i < 1236; ++i){
-        strcpy(re.codigo,to_string(i).c_str());
-        o.add(re);
+    //Apellidos
+    vector<string> vApellido;
+    string apellido[30] = {"Salas", "Palacios", "Casas", "Sanchez", "Albarracin", "Aguirre", "Knel", "Ukzeyi", "Benavides", "Santillana", "Casillas", "Bernal", "Oyague", "Marquez", "Medina", "Campodonico", "Campos", "Sins", "Castillo", "Parker", "Lee", "Yelnats", "Guerrero", "Gaz", "Perez", "Berg", "Kayser", "Bin", "Laden", "Diaz"};
+    for(int i = 0; i < 300; i++){
+        string temp3 = "";
+        temp3 += apellido[rand()%30] + " " + apellido[rand()%30];
+        vApellido.push_back(temp3);
     }
-    printFiles(filename);
-    cout << "Notese que se creo un archivo backup\n\n";
 
-    cout << "================\nFin de pruebas\n================\n\n";
-    return  0;
-}
+    //Carrera
+    vector<string> vCarrera;
+    string carrera[9] = {"CS", "Bioingenieria", "Mecatronica", "Industrial", "Energia", "DS", "Mecanica", "Quimica", "Electronica"};
+    for(int i = 0 ; i < 300 ; i++){
+        string temp4 = "";
+        temp4 += carrera[rand()%9];
+        vCarrera.push_back(temp4);
+    }
 
 
-void printFiles(const string& filename){
-    Registro re;
-    fstream File;
-    cout << endl << " Archivo principal\n";
-    File.open(filename, ios::in| ios::binary);
-    while (File >> re) re.detalle();
-    File.close();
-    cout << endl << " Archivo auxiliar\n";
-    File.open("auxiliar.dat", ios::in| ios::binary);
-    while (File >> re) re.detalle();
-    File.close();
-    cout << endl;
+    //Mensualidad
+    vector<float> vMensualidad;
+    float mensualidad[8] = {1050.5, 1310.5, 2000, 2020.2, 3708.2, 3500.8, 4400.9, 4999.9};
+    for(int i = 0; i < 300; i++){
+        float temp5 = mensualidad[rand()%8];
+        vMensualidad.push_back(temp5);
+    }
+
+
+    ofstream file;
+    file.open("Alumnos.dat",ios::out);
+    if(file.is_open()){
+        file<<"Dni|Nombre|Apellido|Carrera|Mensualidad"<<endl;
+
+        for(auto i = 0 ; i < vDni.size() ; i++){
+            file<<vDni.at(i)<<'|'<<vNombre.at(i)<<'|'<<vApellido.at(i)<<'|'<<vCarrera.at(i)<<'|'<<vMensualidad.at(i)<<endl;
+        }
+
+    }
+
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+*/
+
+    string filename = "Alumnos.dat";
+
+    Alumno alumno1("99999999", "Eduardo", "Salas Palacios", "CS", 2000.45);
+    Alumno alumno2("69696969","Andrea","Aguirre","CS",3000);
+
+    SequentialFile sf(filename);
+    //thread th1()
+    sf.insertAll();
+
+
+    sf.add(alumno1);
+    cout << sf.Search(99999999, true)<<endl;
+    cout<<sf.deletion(30)<<endl;
+    sf.add(alumno2);
+    cout << sf.Search(99999999, true)<<endl;
+    cout<<sf.Search(69696969,true)<<endl;
+    cout<<sf.deletion(207)<<endl;
+
+    ifstream file("Alumnos.dat");
+    int pos = 207*sizeof(Alumno);
+    Alumno temp;
+    file.seekg(pos);
+
+    file>>temp;
+
+    cout<<temp.next;
+
+
+    return 0;
+
 }

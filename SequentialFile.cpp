@@ -5,16 +5,18 @@
 #include <algorithm>
 #include <string>
 #include <sstream>
+#include <thread>
+#include <mutex>
 #include <cmath>
 
 using namespace std;
 
 struct Alumno {
 
-	char Dni [8];
+    char Dni [8];
     char Nombre[15] ;
-    char Apellidos[15];
-    char Carrera [10];
+    char Apellidos[25];
+    char Carrera [15];
     float Mensualidad;
     int next = -1;
 
@@ -34,13 +36,13 @@ struct Alumno {
         for(auto i = 0 ; i < carrera.size() ; i++)
             this->Carrera[i] = carrera[i];
 
-        this->Mensualidad = mensualidad;    
+        this->Mensualidad = mensualidad;
 
     }
 
     void mostrarAlumno() {
-		cout << "Dni        : ";
-        
+        cout << "Dni        : ";
+
         for(auto i : Dni)
             cout<<i;
 
@@ -50,21 +52,21 @@ struct Alumno {
 
         for(auto i : Nombre)
             cout<<i;
-        
+
         cout<<endl;
 
         cout << "Apellidos  : ";
 
         for(auto i: Apellidos)
             cout<<i;
-        
+
         cout<<endl;
 
         cout << "Carrera    : ";
 
         for(auto i: Carrera)
             cout<<i;
-        
+
         cout<<endl;
 
         cout << "Mensualidad: " << Mensualidad << endl;
@@ -83,10 +85,12 @@ istream & operator >> (istream & stream, Alumno & alumno) {
 }
 
 class SequentialFile{
-    private:
+private:
     string filename;
     string auxiliarfile = "auxiliar.dat";
     string bu_name = "data.dat";
+    vector<Alumno> alumnos;
+    mutex parartodo, parartododos, parartodotres;
 
     void clear(){
         ofstream fileof;
@@ -94,7 +98,7 @@ class SequentialFile{
         fileof.close();
         fileof.open(auxiliarfile,ios::out | ios::trunc);
         fileof.close();
-    } 
+    }
 
     static bool criterio(Alumno alumnoA, Alumno alumnoB){
 
@@ -102,21 +106,40 @@ class SequentialFile{
 
     }
 
-    public:
+public:
 
-    SequentialFile(string file): filename(std::move(file)){
+    SequentialFile(string file): filename(file){
+
+        ifstream archivo(file);
+        if (archivo.is_open()) {
+            string campos[5], fila;
+            getline(archivo, fila);
+            while (!archivo.eof()) {
+                getline(archivo, fila);
+                istringstream stringStream(fila);
+                unsigned int contador = 0;
+                while (getline(stringStream, fila, '|')) {
+                    campos[contador] = fila;
+                    contador++;
+                }
+                Alumno alumno(campos[0], campos[1], campos[2], campos[3], stof(campos[4]));
+                alumnos.push_back(alumno);
+                cout << endl;
+            }
+        }
         clear();
+
     }
 
-    void insertAll(vector<Alumno> alumnos){
-        
+    void insertAll(){
+
         sort(alumnos.begin(),alumnos.end(),criterio);
         int numAlumnos = alumnos.size();
         int alumnoSize = sizeof(Alumno);
 
         fstream file;
         file.open(filename,ios::out|ios::binary|ios::app);
-        
+
         if(!file) return;
 
         for(auto i = 0; i < numAlumnos - 1 ; ++i){
@@ -128,49 +151,51 @@ class SequentialFile{
         file.close();
     }
 
+
     void add(Alumno alumno){
+        parartododos.lock();
         int auxf_size = size(auxiliarfile);
 
-    if (auxf_size < 10) {
-        Alumno temp;
-        int record_size = sizeof(Alumno);
-        int the_pos = Search(stol(alumno.Dni), true);
+        if (auxf_size < 10) {
+            Alumno temp;
+            int record_size = sizeof(Alumno);
+            int the_pos = Search(stol(alumno.Dni), true);
 
-        readRecord(filename,temp,the_pos*record_size);
+            readRecord(filename,temp,the_pos*record_size);
 
-        // Record is at the end of file
-        if (temp.next == -1) {
-            temp.next = (the_pos + 1) * record_size;
-            writeRecord(filename, temp, the_pos*record_size, false);
-            writeRecord(filename,alumno, 0, true);
-        }
-        else {
-            // Record in the main file
-            if (temp.next > 0) {
-                alumno.next = temp.next;
-                temp.next = -1 * (auxf_size+1) * record_size;
+            // Record is at the end of file
+            if (temp.next == -1) {
+                temp.next = (the_pos + 1) * record_size;
                 writeRecord(filename, temp, the_pos*record_size, false);
-                writeRecord(auxiliarfile, alumno, 0, true);
+                writeRecord(filename,alumno, 0, true);
             }
-            // Record in auxliar file
             else {
-                int pos_it = -1*(temp.next+record_size);
-                readRecord(auxiliarfile, temp, -1*(temp.next+record_size));
-                while (temp.next < 0 && stol(temp.Dni) < stol(alumno.Dni)) {
-                    pos_it = -1*(temp.next+record_size);
-                    readRecord(auxiliarfile, temp, pos_it);
+                // Record in the main file
+                if (temp.next > 0) {
+                    alumno.next = temp.next;
+                    temp.next = -1 * (auxf_size+1) * record_size;
+                    writeRecord(filename, temp, the_pos*record_size, false);
+                    writeRecord(auxiliarfile, alumno, 0, true);
                 }
-                alumno.next = temp.next;
-                temp.next = -1 * (auxf_size+1) * record_size;
-                writeRecord(auxiliarfile, temp, pos_it, false);
-                writeRecord(auxiliarfile, alumno, 0, true);
+                    // Record in auxliar file
+                else {
+                    int pos_it = -1*(temp.next+record_size);
+                    readRecord(auxiliarfile, temp, -1*(temp.next+record_size));
+                    while (temp.next < 0 && stol(temp.Dni) < stol(alumno.Dni)) {
+                        pos_it = -1*(temp.next+record_size);
+                        readRecord(auxiliarfile, temp, pos_it);
+                    }
+                    alumno.next = temp.next;
+                    temp.next = -1 * (auxf_size+1) * record_size;
+                    writeRecord(auxiliarfile, temp, pos_it, false);
+                    writeRecord(auxiliarfile, alumno, 0, true);
+                }
             }
         }
-    } 
         else {
-            cout << "JOIN";
             joinFiles(alumno);
         }
+        parartododos.unlock();
     }
 
     int Search(long key, bool less_equal = false){
@@ -185,7 +210,6 @@ class SequentialFile{
             }
             file.close();
         }
-        cout << "arriba";
         file.open(filename,ios::in|ios::binary);
         if (!file)
             return -1;
@@ -212,21 +236,20 @@ class SequentialFile{
         }
         file.close();
 
-            if (less_equal) {
-                cout << "if2";
-                if (right < 0)
-                    return 0;
-                else if (left > (size(filename) - 1))
-                    return size(filename) - 1;
-                else
-                    return (left < right)
-                        ? left : right;
-            }
-            cout << "chau";
-            return -1;
+        if (less_equal) {
+            if (right < 0)
+                return 0;
+            else if (left > (size(filename) - 1))
+                return size(filename) - 1;
+            else
+                return (left < right)
+                       ? left : right;
+        }
+        return -1;
     }
 
     bool deletion(int pos) {
+        parartodo.lock();
         if (pos < 0 || pos > size(filename)-1)
             return false;
 
@@ -270,23 +293,25 @@ class SequentialFile{
             writeRecord(fi_name, temp2, posit, false);
             return true;
         }
+
         return false;
+        parartodo.unlock();
     }
 
     int size(const string& Fname){
 
         int numRecords = 0;
-    fstream inFile;
-    inFile.open(Fname, ios::in | ios::binary);
-    if (inFile.is_open()) {
-        inFile.seekg(0, ios::end);
-        long bytes = inFile.tellg();
-        numRecords = bytes / sizeof(Alumno);
-        inFile.close();
-    } else cout << "No se pudo abrir el archivo.\n";
-    return numRecords;
+        fstream inFile;
+        inFile.open(Fname, ios::in | ios::binary);
+        if (inFile.is_open()) {
+            inFile.seekg(0, ios::end);
+            long bytes = inFile.tellg();
+            numRecords = bytes / sizeof(Alumno);
+            inFile.close();
+        } else cout << "No se pudo abrir el archivo.\n";
+        return numRecords;
     }
-    
+
     void readRecord(const string& file, Alumno & temp, int pos) {
         ifstream nfile;
         nfile.open(file, ios::in| ios::binary);
@@ -296,14 +321,16 @@ class SequentialFile{
     }
 
     void writeRecord(const string &mfile, Alumno &record, int pos, bool app) {
+        parartodotres.lock();
         fstream archivo;
         archivo.open(mfile, ios::in| ios::out| ios::binary);
-        if (app) archivo.seekp(0, ios::end);
+        if (app)
+            archivo.seekp(0, ios::end);
         else archivo.seekp(pos);
         archivo << record;
         archivo.close();
+        parartodotres.unlock();
     }
-
 
     void joinFiles(Alumno& record) {
         int rcd_size = (int)sizeof(Alumno), ntx = 0;
@@ -316,151 +343,19 @@ class SequentialFile{
         int pos_it = temp1.next;
         while (pos_it != -1) {
             if (pos_it == 0) {
-                pos_it = (pos_it+1)*rcd_size;
-                readRecord(bu_name,temp1,pos_it);
-                continue;
+                temp1.next = (++ntx)*rcd_size;
+                writeRecord(filename, temp1, 0, true);
+                if (pos_it < 0)
+                    readRecord(auxiliarfile,temp1,-1*(pos_it+rcd_size));
+                else
+                    readRecord(bu_name, temp1, pos_it);
             }
-            if (stol(temp1.Dni) > stol(record.Dni)) {
-                record.next = (++ntx)*rcd_size;
-                writeRecord(filename, record,0, true);
-            }
-            pos_it = temp1.next;
-            temp1.next = (++ntx)*rcd_size;
-            writeRecord(filename, temp1, 0, true);
-            if (pos_it < 0)
-                readRecord(auxiliarfile,temp1,-1*(pos_it+rcd_size));
-            else
-                readRecord(bu_name, temp1, pos_it);
-        }
 
-        readRecord(filename,temp1,(size(filename)-1)*rcd_size);
-        temp1.next = -1;
-        writeRecord(filename, temp1, (size(filename)-1)*rcd_size, false);
-        file.open(auxiliarfile, ios::out| ios::binary);
-        file.close();
+            readRecord(filename,temp1,(size(filename)-1)*rcd_size);
+            temp1.next = -1;
+            writeRecord(filename, temp1, (size(filename)-1)*rcd_size, false);
+            file.open(auxiliarfile, ios::out| ios::binary);
+            file.close();
+        }
     }
 };
-
-
-int main(){
-
-    string archivo = "Alumnos.dat";
-    SequentialFile sf(archivo);
-
-    Alumno alumno1("71354857","Howard","Paredes Zegarra","Computacion",1800.0);
-    Alumno alumno2("76249534","Penny","Vargas Cordero","Industrial",2550.0);
-    Alumno alumno3("82010068","Sheldon","Cooper Quizpe","Mecatronica",3000.0);
-
-
-    vector<Alumno> alumnos = {alumno1,alumno2};
-
-    sf.insertAll(alumnos);
-    
-    sf.add(alumno2);
-    cout<<sf.Search(71354857,true);
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
