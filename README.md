@@ -34,13 +34,13 @@ La primera usa una clase Alumno con atributos de tipo string y un float. Creamos
 
 La clase Directory cuenta con cuatro métodos privados:
 
-- hash(int n) : 
+    - hash(int n) : 
 
-- split(int bucket_num) : 
+    - split(int bucket_num) : 
 
-- reinsert(int bucket_num) : 
+    - reinsert(int bucket_num) : 
 
-- Doubledirectory() : 
+    - Doubledirectory() : 
 
 ### Sequential File
 
