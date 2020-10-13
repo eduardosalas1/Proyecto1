@@ -5,6 +5,7 @@
 #include <tuple>
 #include <string>
 #include <fstream>
+#include <future>
 #include "SequentialFile.cpp"
 using namespace std;
 
@@ -81,17 +82,36 @@ int main(){
     Alumno alumno2("69696969","Andrea","Aguirre","CS",3000);
 
     SequentialFile sf(filename);
-    //thread th1()
-    sf.insertAll();
+    //sf.insertAll();
+    thread t0(&SequentialFile::insertAll, &sf);
+    t0.join();
 
-
-    sf.add(alumno1);
-    cout << sf.Search(99999999, true)<<endl;
-    cout<<sf.deletion(30)<<endl;
-    sf.add(alumno2);
-    cout << sf.Search(99999999, true)<<endl;
-    cout<<sf.Search(69696969,true)<<endl;
-    cout<<sf.deletion(207)<<endl;
+    thread taux(&SequentialFile::add, &sf, alumno1);
+    taux.join();
+    //sf.add(alumno1);
+    auto auxaux = async(&SequentialFile::Search, &sf, 99999999, true);
+    auto auxaux2 = auxaux.get();
+    cout << auxaux2 << endl;
+    //cout << sf.Search(99999999, true)<<endl;
+    auto ayuda = async(&SequentialFile::deletion, &sf, 30);
+    auto ayuda2 = ayuda.get();
+    cout << ayuda2 << endl;
+    //cout<<sf.deletion(30)<<endl;
+    thread t3(&SequentialFile::add, &sf, alumno2);
+    t3.join();
+    //sf.add(alumno2);
+    auto aux1 = async(&SequentialFile::Search, &sf, 99999999, true);
+    auto respuesta1 = aux1.get();
+    cout << respuesta1 << endl;
+    //cout << sf.Search(99999999, true)<<endl;
+    auto aux2 = async(&SequentialFile::Search, &sf, 69696969, true);
+    auto respuesta2 = aux2.get();
+    cout << respuesta2 << endl;
+    //cout<<sf.Search(69696969,true)<<endl;
+    auto ayuda3 = async(&SequentialFile::deletion, &sf, 207);
+    auto ayuda4 = ayuda3.get();
+    cout << ayuda4 << endl;
+    //cout<<sf.deletion(207)<<endl;
 
     ifstream file("Alumnos.dat");
     int pos = 207*sizeof(Alumno);

@@ -55,49 +55,77 @@ class Bucket{
 		this->localdepth = depth;
 	}
 	
-	bool isFull();
-	bool isEmpty();
-	int insert(Alumno* key);
-	int search(string dni);
-	void copy(vector <Alumno*> &temp);
-	int getdepth();
-	void display();
-	void increasedepth();
-	void del(string key);
-};
+	bool isFull(){
+		if (listaAlumnos.size() == size)
+		return true;
+	else
+		return false;
+	};
 
-void Bucket :: del(string key){
-	for(int i = 0; i < listaAlumnos.size(); i++)
-		if (listaAlumnos.at(i)->getDni() == key){
+	int insert(Alumno* key){
+		if (isFull())
+			return -1;
+		for(int i = 0; i < listaAlumnos.size(); i++)
+			if (listaAlumnos.at(i)->getDni() == key->getDni())
+				return 0;
+		listaAlumnos.push_back(key);
+		
+		return 1;
+	};
+	
+	int search(string dni){
+		
+		for(int i = 0; i < listaAlumnos.size(); i++)
+		if (listaAlumnos.at(i)->getDni() == dni)
+			return 1;
+		return 0;
+
+	};
+	
+	void copy(vector <Alumno*> &temp){
+		for(int i = 0; i < listaAlumnos.size(); i++)
+        	temp.push_back(listaAlumnos.at(i));
+    	listaAlumnos.clear();
+
+	};
+
+	int getdepth(){
+		return this->localdepth;
+	
+	};
+
+	void display(){
+		cout << localdepth << "   ";
+    	for(int i = 0; i < listaAlumnos.size(); i++)
+        	listaAlumnos.at(i)->mostrarAlumno();cout << " ";
+    	cout << endl;
+	};
+
+	
+	void increasedepth(){copy(listaAlumnos.at(i)->getDni() == key){
 			listaAlumnos.erase(listaAlumnos.begin() + i);
 			return;
 		}
-	cout << "No existe tal Key" << endl;
-}
+		cout << "No existe tal Key" << endl;
+	
 
-void Bucket :: display(){
-    cout << localdepth << "   ";
-    for(int i = 0; i < listaAlumnos.size(); i++)
-        listaAlumnos.at(i)->mostrarAlumno();cout << " ";
-    cout << endl;
-}
+	};
+};
 
-int Bucket :: getdepth(){
-    return this->localdepth;
-}
 
-void Bucket :: increasedepth(){
+/*void Bucket :: increasedepth(){
     this->localdepth++;
 
-}
-bool Bucket :: isFull(){
+}*/
+
+/*bool Bucket :: isFull(){
 	if (listaAlumnos.size() == size)
 		return true;
 	else
 		return false;
-}
+}*/
 
-int Bucket :: insert(Alumno* key){
+/*int Bucket :: insert(Alumno* key){
 	if (isFull())
 		return -1;
 	for(int i = 0; i < listaAlumnos.size(); i++)
@@ -105,32 +133,70 @@ int Bucket :: insert(Alumno* key){
 			return 0;
 	listaAlumnos.push_back(key);
 	return 1;
-}
+}*/
 
-int Bucket :: search(string dni){
+/*int Bucket :: search(string dni){
 	for(int i = 0; i < listaAlumnos.size(); i++)
 		if (listaAlumnos.at(i)->getDni() == dni)
 			return 1;
 	return 0;
-}
+}*/
 
-void Bucket :: copy(vector <Alumno*> &temp){
-    for(int i = 0; i < listaAlumnos.size(); i++)
-        temp.push_back(listaAlumnos.at(i));
-    listaAlumnos.clear();
-}
 
 class Directory{
 	int globaldepth;
 	int bucketsize;
 	vector <Bucket *> buckets;
-	int hash(int n);
-	void split(int bucket_num);
-	void reinsert(int bucket_num);
-	void Doubledirectory();
+
+	int hash(int n){
+		return n&( (1 << globaldepth) - 1);
+	}
+
+	void split(int bucket_num){
+
+		int localdepth = buckets[bucket_num]->getdepth();
+		//cout << globaldepth << " " << localdepth << endl;
+		if (globaldepth == localdepth)
+			Doubledirectory();
+		int mirrorindex = bucket_num ^ (1 << localdepth);
+		buckets[bucket_num]->increasedepth();
+		localdepth++;
+		//cout << buckets[bucket_num]->getdepth() << endl;
+		buckets[mirrorindex] = new Bucket(localdepth, bucketsize);
+		int num = 1 << localdepth;
+		for(int i = mirrorindex + num; i < (1 << globaldepth); i += num)
+			buckets[i] = buckets[mirrorindex];
+		for(int i = mirrorindex - num; i >=0 ; i -= num)
+			buckets[i] = buckets[mirrorindex];
+		reinsert(bucket_num);
 	
+	}
+
+	void reinsert(int bucket_num){
+	
+		vector <Alumno*> temp;
+		buckets[bucket_num]->copy(temp);
+		for(int i = 0; i < temp.size(); i++){
+			Alumno* key = temp.at(i);
+			int bucket_num  = hash(stoi(key->getDni()));
+			//cout << "new bucket_num" << bucket_num << endl;
+			int banderita = buckets[bucket_num]->insert(key);
+			if (banderita == -1){
+				split(bucket_num);
+				buckets[bucket_num]->insert(key);
+			}
+		}
+	
+	}
+
+	void Doubledirectory(){
+		for(int i = 0; i < (1 << globaldepth); i++)
+			buckets.push_back(buckets.at(i);
+		this->globaldepth++;
+	}
 	
 	public:
+
 	Directory(int globaldepth, int bucket_size){
 		this->globaldepth = globaldepth;
 		this->bucketsize = bucket_size;
@@ -138,29 +204,94 @@ class Directory{
 			buckets.push_back(new Bucket(globaldepth, bucket_size));
 	}
 	
-	void leerAlumnos(string archivo);
-	void insert(Alumno* key);
-	void del(string dni);
-	void search(string dni);
-	void display();
+	void leerAlumnos(string file){
+
+		ifstream archivo(file);
+    	if (archivo.is_open()) {
+    	    string campos[5], fila;
+    	    getline(archivo, fila);
+    	    while (!archivo.eof()) {
+    	        getline(archivo, fila);
+    	        istringstream stringStream(fila);
+    	        uint contador = 0;
+    	        while (getline(stringStream, fila, '|')) {
+    	            campos[contador] = fila;
+    	            contador++;
+    	        }
+    	        Alumno* alumno = new Alumno(campos[0], campos[1], campos[2], campos[3], stof(campos[4]));
+    	        insert(alumno);
+    	        cout << endl;
+    	    }
+    	}
+
+	}
+
+	void insert(Alumno* key){
+
+		int bucket_num = hash(stoi(key->getDni()));
+		int banderita = buckets[bucket_num]->insert(key);
+		if (banderita == -1){
+    	    cout << "splitting bucketnum " << bucket_num << endl;
+			split(bucket_num);
+			insert(key);
+		}
+		else if (banderita == 0){
+			cout << "Key already exists" << endl;
+		}
+		else{
+			cout << key << " inserted in bucket having number " << bucket_num << endl;
+		}
+
+	}
+	void del(string dni){
+		int bucket_num = hash(stoi(dni));
+		buckets[bucket_num]->del(dni);
+	}
+
+	void search(string dni){
+
+		int bucket_num = hash(stoi(dni));
+		int banderita = buckets[bucket_num]->search(dni);
+		if (banderita == 1){
+			cout << dni << " exists in bucket number " << bucket_num <<  endl;
+		}
+		else{
+			cout << dni << " doesnot exist " << endl;
+		}
+	}
+	void display(){
+
+		set <Bucket*> s;
+		for(int i = 0; i < (1 << globaldepth); i++){
+    	    if (s.find(buckets[i]) != s.end())
+    	        continue;
+			cout << i << ": ";
+			buckets[i]->display();
+    	    s.insert(buckets[i]);
+		}
+	}
 };
 
+/*
 void Directory :: del(string key){
 	int bucket_num = hash(stoi(key));
 	buckets[bucket_num]->del(key);
-}
+}*/
 
+/*
 int Directory :: hash (int n){
 	return n&( (1 << globaldepth) - 1);
-}
+}*/
 
+/*
 void Directory :: Doubledirectory(){
 	for(int i = 0; i < (1 << globaldepth); i++)
 		buckets.push_back(buckets.at(i));
 	this->globaldepth++;
 	//cout << "line 94 " << this->globaldepth << endl;;
-}
+}*/
 
+/*
 void Directory :: reinsert(int bucket_num){
 	vector <Alumno*> temp;
 	buckets[bucket_num]->copy(temp);
@@ -174,8 +305,9 @@ void Directory :: reinsert(int bucket_num){
 			buckets[bucket_num]->insert(key);
 		}
 	}
-}
+}*/
 
+/*
 void Directory :: split(int bucket_num){
 	int localdepth = buckets[bucket_num]->getdepth();
 	//cout << globaldepth << " " << localdepth << endl;
@@ -192,8 +324,9 @@ void Directory :: split(int bucket_num){
 	for(int i = mirrorindex - num; i >=0 ; i -= num)
 		buckets[i] = buckets[mirrorindex];
 	reinsert(bucket_num);
-}
+}*/
 
+/*
 void Directory :: insert(Alumno* key){
 	int bucket_num = hash(stoi(key->getDni()));
 	int banderita = buckets[bucket_num]->insert(key);
@@ -208,8 +341,9 @@ void Directory :: insert(Alumno* key){
 	else{
 		cout << key << " inserted in bucket having number " << bucket_num << endl;
 	}
-}
+}*/
 
+/*
 void Directory :: search (string dni){
 	int bucket_num = hash(stoi(dni));
 	int banderita = buckets[bucket_num]->search(dni);
@@ -219,8 +353,8 @@ void Directory :: search (string dni){
 	else{
 		cout << dni << " doesnot exist " << endl;
 	}
-}
-
+}*/
+/*
 void Directory :: display(){
     set <Bucket*> s;
 	for(int i = 0; i < (1 << globaldepth); i++){
@@ -230,8 +364,9 @@ void Directory :: display(){
 		buckets[i]->display();
         s.insert(buckets[i]);
 	}
-}
+}*/
 
+/*
 void Directory :: leerAlumnos(string file) {
     ifstream archivo(file);
     if (archivo.is_open()) {
@@ -250,7 +385,7 @@ void Directory :: leerAlumnos(string file) {
             cout << endl;
         }
     }
-}
+}*/
 
 int main(){
 	int globaldepth, bucket_size;
