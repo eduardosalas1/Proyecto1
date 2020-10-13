@@ -6,6 +6,8 @@
 #include <string>
 #include <fstream>
 #include <future>
+#include <chrono>
+#include <ctime>
 #include "SequentialFile.cpp"
 using namespace std;
 
@@ -75,6 +77,7 @@ int main(){
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 */
+    chrono::time_point<chrono::system_clock> start,end;
 
     string filename = "Alumnos.dat";
 

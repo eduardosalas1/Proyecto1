@@ -46,7 +46,11 @@ También cuenta con métodos públicos:
 
     - leerAlumnos(string file) : Lee el archivo e inserta los registros en un vector de Alumno.
 
+<<<<<<< HEAD
     - insert(Alumno* key) : Inserta el alumno enviado como parámetro. Si es que el bucket está lleno llama a la función split, si ya existe manda un mensaje a consola 
+=======
+    - insert(Alumno* key) : Inserta el alumno recibido como parámetro. Si este ya existe, entonces manda un mensaje a consola indicando esto. Si el bucket en donde debe ser insertado está lleno, entonces llama a la función split y luego lo inserta. Finalmente, si el alumno recibido no está registrado aún y hay espacio en su bucket respectivo, entonces lo inserta.
+>>>>>>> cbd6c58c1750699c998da08795f6141ca8de7ac9
 
     - del(string dni) : Elimina el registro cuyo dni coincide con el ingresado
 
