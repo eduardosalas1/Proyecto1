@@ -63,13 +63,13 @@ class Bucket{
 	};
 
 	int insert(Alumno* key){
+
 		if (isFull())
 			return -1;
 		for(int i = 0; i < listaAlumnos.size(); i++)
 			if (listaAlumnos.at(i)->getDni() == key->getDni())
 				return 0;
 		listaAlumnos.push_back(key);
-		
 		return 1;
 	};
 	
@@ -101,15 +101,18 @@ class Bucket{
     	cout << endl;
 	};
 
-	
-	void increasedepth(){copy(listaAlumnos.at(i)->getDni() == key){
+	void del(string key){
+	for(int i = 0; i < listaAlumnos.size(); i++)
+		if (listaAlumnos.at(i)->getDni() == key){
 			listaAlumnos.erase(listaAlumnos.begin() + i);
 			return;
 		}
-		cout << "No existe tal Key" << endl;
-	
+	cout << "No existe tal Key" << endl;
+}
 
-	};
+	void increasedepth(){
+    	this->localdepth++;
+	}
 };
 
 
@@ -155,13 +158,11 @@ class Directory{
 	void split(int bucket_num){
 
 		int localdepth = buckets[bucket_num]->getdepth();
-		//cout << globaldepth << " " << localdepth << endl;
 		if (globaldepth == localdepth)
 			Doubledirectory();
 		int mirrorindex = bucket_num ^ (1 << localdepth);
 		buckets[bucket_num]->increasedepth();
 		localdepth++;
-		//cout << buckets[bucket_num]->getdepth() << endl;
 		buckets[mirrorindex] = new Bucket(localdepth, bucketsize);
 		int num = 1 << localdepth;
 		for(int i = mirrorindex + num; i < (1 << globaldepth); i += num)
@@ -169,29 +170,25 @@ class Directory{
 		for(int i = mirrorindex - num; i >=0 ; i -= num)
 			buckets[i] = buckets[mirrorindex];
 		reinsert(bucket_num);
-	
 	}
 
 	void reinsert(int bucket_num){
-	
 		vector <Alumno*> temp;
 		buckets[bucket_num]->copy(temp);
 		for(int i = 0; i < temp.size(); i++){
 			Alumno* key = temp.at(i);
 			int bucket_num  = hash(stoi(key->getDni()));
-			//cout << "new bucket_num" << bucket_num << endl;
 			int banderita = buckets[bucket_num]->insert(key);
 			if (banderita == -1){
 				split(bucket_num);
 				buckets[bucket_num]->insert(key);
 			}
 		}
-	
 	}
 
 	void Doubledirectory(){
 		for(int i = 0; i < (1 << globaldepth); i++)
-			buckets.push_back(buckets.at(i);
+			buckets.push_back(buckets.at(i));
 		this->globaldepth++;
 	}
 	
@@ -231,15 +228,15 @@ class Directory{
 		int bucket_num = hash(stoi(key->getDni()));
 		int banderita = buckets[bucket_num]->insert(key);
 		if (banderita == -1){
-    	    cout << "splitting bucketnum " << bucket_num << endl;
+    	    cout << "separando bucket... " << bucket_num << endl;
 			split(bucket_num);
 			insert(key);
 		}
 		else if (banderita == 0){
-			cout << "Key already exists" << endl;
+			cout << "Ya existe el dni" << endl;
 		}
 		else{
-			cout << key << " inserted in bucket having number " << bucket_num << endl;
+			cout << key << " insertado " << bucket_num << endl;
 		}
 
 	}
@@ -253,12 +250,13 @@ class Directory{
 		int bucket_num = hash(stoi(dni));
 		int banderita = buckets[bucket_num]->search(dni);
 		if (banderita == 1){
-			cout << dni << " exists in bucket number " << bucket_num <<  endl;
+			cout << dni << " existe " << bucket_num <<  endl;
 		}
 		else{
-			cout << dni << " doesnot exist " << endl;
+			cout << dni << " no existe " << endl;
 		}
 	}
+
 	void display(){
 
 		set <Bucket*> s;
