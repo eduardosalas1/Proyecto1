@@ -48,6 +48,7 @@ class Bucket{
 	vector <Alumno*> listaAlumnos;
 	int localdepth;
 	int size;
+	mutex parartodo, parartododos, parartodotres;
 
 	public:
 	Bucket(int depth, int size){
@@ -63,7 +64,7 @@ class Bucket{
 	};
 
 	int insert(Alumno* key){
-
+		parartodo.lock();
 		if (isFull())
 			return -1;
 		for(int i = 0; i < listaAlumnos.size(); i++)
@@ -71,14 +72,16 @@ class Bucket{
 				return 0;
 		listaAlumnos.push_back(key);
 		return 1;
+		parartodo.unlock();
 	};
 	
 	int search(string dni){
-		
+		parartododos.lock();
 		for(int i = 0; i < listaAlumnos.size(); i++)
 		if (listaAlumnos.at(i)->getDni() == dni)
 			return 1;
 		return 0;
+		parartododos.unlock();
 
 	};
 	
@@ -102,12 +105,14 @@ class Bucket{
 	};
 
 	void del(string key){
+	parartodotres.lock();
 	for(int i = 0; i < listaAlumnos.size(); i++)
 		if (listaAlumnos.at(i)->getDni() == key){
 			listaAlumnos.erase(listaAlumnos.begin() + i);
 			return;
 		}
 	cout << "No existe tal Key" << endl;
+	parartodotres.unlock();
 }
 
 	void increasedepth(){
@@ -150,13 +155,15 @@ class Directory{
 	int globaldepth;
 	int bucketsize;
 	vector <Bucket *> buckets;
+	mutex parartodocuatro, parartodocinco, parartodoseis,parartodosiete,
+	parartodoocho;
 
 	int hash(int n){
 		return n&( (1 << globaldepth) - 1);
 	}
 
 	void split(int bucket_num){
-
+		parartodocuatro.lock();
 		int localdepth = buckets[bucket_num]->getdepth();
 		if (globaldepth == localdepth)
 			Doubledirectory();
@@ -170,9 +177,12 @@ class Directory{
 		for(int i = mirrorindex - num; i >=0 ; i -= num)
 			buckets[i] = buckets[mirrorindex];
 		reinsert(bucket_num);
+		parartodocuatro.unlock();
+
 	}
 
 	void reinsert(int bucket_num){
+		parartodocinco.lock();
 		vector <Alumno*> temp;
 		buckets[bucket_num]->copy(temp);
 		for(int i = 0; i < temp.size(); i++){
@@ -184,6 +194,7 @@ class Directory{
 				buckets[bucket_num]->insert(key);
 			}
 		}
+		parartodocinco.unlock();
 	}
 
 	void Doubledirectory(){
@@ -224,7 +235,7 @@ class Directory{
 	}
 
 	void insert(Alumno* key){
-
+		parartodoseis.lock();
 		int bucket_num = hash(stoi(key->getDni()));
 		int banderita = buckets[bucket_num]->insert(key);
 		if (banderita == -1){
@@ -238,15 +249,19 @@ class Directory{
 		else{
 			cout << key << " insertado " << bucket_num << endl;
 		}
+		parartodoseis.unlock();
+
 
 	}
 	void del(string dni){
+		parartodosiete.lock();
 		int bucket_num = hash(stoi(dni));
 		buckets[bucket_num]->del(dni);
+		parartodosiete.unlock();
 	}
 
 	void search(string dni){
-
+		parartodoocho.lock();
 		int bucket_num = hash(stoi(dni));
 		int banderita = buckets[bucket_num]->search(dni);
 		if (banderita == 1){
@@ -255,6 +270,8 @@ class Directory{
 		else{
 			cout << dni << " no existe " << endl;
 		}
+		parartodoocho.unlock();
+
 	}
 
 	void display(){
@@ -389,22 +406,30 @@ int main(){
 	int globaldepth, bucket_size;
 	cin >> globaldepth >> bucket_size;
 	Directory d(globaldepth, bucket_size);
-	d.leerAlumnos("Alumnos.txt");
+	thread principal(&Directory::leerAlumnos, &d, "Alumnos.txt");
+	principal.join();
+	//d.leerAlumnos("Alumnos.txt");
 	int opcion;
 	cin >> opcion;
 	while(opcion != -1){
 		if (opcion == 3){
 			string key ;
 			cin>>key;
-			d.search(key);
+			thread t0(&Directory::search, &d, key);
+			t0.join();
+			//d.search(key);
 		}
 		else if (opcion == 4){
 			string key;
 			cin>>key;
-			d.del(key);
+			thread t1(&Directory::del, &d, key);
+			t1.join();
+			//d.del(key);
 		}
 		else if (opcion == 5){
-            d.display();
+			thread t3(&Directory::display, &d);
+			t3.join();
+            //d.display();
 		}
 		else if(opcion == 6){
 			string Dni; cin >> Dni;
@@ -413,7 +438,9 @@ int main(){
 			string Carrera; cin >> Carrera;
 			float Mensualidad; cin >> Mensualidad;
 			Alumno* alumno = new Alumno(Dni, Nombre, Apellidos, Carrera, Mensualidad);
-			d.insert(alumno);
+			thread t2(&Directory::insert, &d, alumno);
+			t2.join();
+			//d.insert(alumno);
 		}
 		cin >> opcion;
 	}
