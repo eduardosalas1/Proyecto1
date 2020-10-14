@@ -13,6 +13,10 @@ using namespace std;
 
 int main(){
 
+    while(opcion != 1){
+        
+    }
+
     /*srand(time(nullptr));
 
     char nums[10] = {'0','1','2','3','4','5','6','7','8','9'};
@@ -77,22 +81,45 @@ int main(){
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 */
-    string filename = "Alumnos.dat";
-
-    Alumno alumno1("99999999", "Eduardo", "Salas Palacios", "CS", 2000.45);
-    Alumno alumno2("69696969","Andrea","Aguirre","CS",3000);
-
-    SequentialFile sf(filename);
-
-    sf.insertAll();
     
-    sf.add(alumno1);
+    SequentialFile Sf("Alumnos.dat");
+    Sf.insertAll();
+    int opcion ;
+    cout << "Ingrese la opcion: \n-1: salir\n 1: mostrar registros\n 2: insertar registro\n 3: buscar un registro\n 4: eliminar registro\n";
+    cin >> opcion;
+    
+    while(opcion != -1){
+        if (opcion == 3){
+			string key ;
+			cin>>key;
+		}
+		else if (opcion == 4){
+			string key;
+			cin>>key;
+		}
+		else if (opcion == 1){
+		}
+		else if(opcion == 2){
+			string Dni;
+			cout << "Ingrese el dni" ; cin >> Dni;
+			string Nombre;
+			cout << "Ingrese el nombre"; cin >> Nombre;
+			string Apellidos;
+			cout << "Ingrese el apellido"; cin >> Apellidos;
+			string Carrera; 
+			cout << "Ingrese la carrera"; cin >> Carrera;
+			float Mensualidad;
+			cout << "Ingrese la mensualidad"; cin >> Mensualidad;
+			Alumno alumno(Dni, Nombre, Apellidos, Carrera, Mensualidad);
+            add(alumno);
+		}
+		cout << "Ingrese la opcion: \n-1: salir\n 1: mostrar registros\n 2: insertar registro\n 3: buscar un registro\n 4: eliminar registro\n";
+		cin >> opcion;
 
-    auto start = chrono::steady_clock::now();
-    sf.Search(57301492,true);
-	auto end = chrono::steady_clock::now();
+        
+    }
 
-    cout<<chrono::duration_cast<chrono::microseconds>(end - start).count() << " microsec"<<endl;
+
 
 
     //thread t0(&SequentialFile::insertAll, &sf);

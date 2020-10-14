@@ -83,7 +83,7 @@ Por otro lado, la clase SequentialFile cuenta con múltiples métodos que serán
     - joinFiles(Alumno&): Une y ordena los archivos en uno solo.
 
 
-## Pruebas y Resultados experimentales
+## Pruebas
 
 La simulación de transacciones será realizada de manera manual en la misma presentación para cada estructura de datos, cada metodo sera realizado en un nuevo hilo.
 A continuación explicaremos en que consiste cada transacción a realizar en la Base de datos para cada estructura de datos.
@@ -93,14 +93,25 @@ A continuación explicaremos en que consiste cada transacción a realizar en la 
 En el EH probaremos corriendo una base de datos universitaria basica de formato .dat, escogiendo principalmente el global depth y el bucket_size = Cuanto aguantara maximo por bucket antes de hacer split, luego aumentara el local depth del bucket partido.
 Se escogera manualmente en el terminal una de las opciones, primero tendremos buscar por medio del Dni, luego tenemos la opcion de delete por medio igualmente de Dni, tambien tenemos la opcion de imprimir los datos de las personas, por ultimo la opcion de introducir un nuevo alumno, ingresando los parametros de la clase Alumno de forma manual.
 
-![Grafica Extendible y Sequential](source/Grafica.png)
-
 
 ### Sequential File
 
 En el caso de Sequential File generaremos una data con datos reales y apartir de eso iremos insertando y añadiendo alumnos desde el main para que se pueda ir llenando el auxiliar file y sucesivamente observar como se concatena todo en un solo archivo. Adicional a esto borraremos alumnos con nuestra
 función deletion y nos percataremos de que el puntero siguiente cambia de valor a cero. Por último, buscaremos un alumno gracias a la posicion que nos brindará el search (binary search).
 
+
+## Resultados Experimentales
+
+A continuacion veremos los resultados de nuestras operaciones de search y add, en ambas estructuras de forma comparativa. 
+
+
+![Grafica Extendible y Sequential Search](source/WhatsApp Image 2020-10-13 at 10.52.42 PM (1).jpeg)
+
+![Grafica Extendible y Sequential Add](source/WhatsApp Image 2020-10-13 at 10.52.42 PM.jpeg)
+
+
+*Tiempos en microsegundos.
+
 ## Conclusión
 
-En conclusión, analizando las tablas comparativas se pudo plantear la solucion optima al problema de la organizacion de los archivos de esta base de datos siendo el Extendible Hashing un método más efectivo y rápido.
+En conclusión, analizando las imágenes comparativas se pudo plantear la solucion optima al problema de la organizacion de los archivos de esta base de datos siendo el Extendible Hashing un método más efectivo y rápido.
