@@ -1,5 +1,7 @@
 #include <bits/stdc++.h>
 #include <string>
+#include <chrono>
+#include <ctime>
 using namespace std;
 
 class Alumno {
@@ -48,6 +50,7 @@ class Bucket{
 	vector <Alumno*> listaAlumnos;
 	int localdepth;
 	int size;
+	mutex parartodo, parartododos, parartodotres;
 
 	public:
 	Bucket(int depth, int size){
@@ -63,7 +66,7 @@ class Bucket{
 	};
 
 	int insert(Alumno* key){
-
+		parartodo.lock();
 		if (isFull())
 			return -1;
 		for(int i = 0; i < listaAlumnos.size(); i++)
@@ -71,14 +74,16 @@ class Bucket{
 				return 0;
 		listaAlumnos.push_back(key);
 		return 1;
+		parartodo.unlock();
 	};
 	
 	int search(string dni){
-		
+		parartododos.lock();
 		for(int i = 0; i < listaAlumnos.size(); i++)
 		if (listaAlumnos.at(i)->getDni() == dni)
 			return 1;
 		return 0;
+		parartododos.unlock();
 
 	};
 	
@@ -102,12 +107,14 @@ class Bucket{
 	};
 
 	void del(string key){
+	parartodotres.lock();
 	for(int i = 0; i < listaAlumnos.size(); i++)
 		if (listaAlumnos.at(i)->getDni() == key){
 			listaAlumnos.erase(listaAlumnos.begin() + i);
 			return;
 		}
 	cout << "No existe tal Key" << endl;
+	parartodotres.unlock();
 }
 
 	void increasedepth(){
@@ -150,13 +157,15 @@ class Directory{
 	int globaldepth;
 	int bucketsize;
 	vector <Bucket *> buckets;
+	mutex parartodocuatro, parartodocinco, parartodoseis,parartodosiete,
+	parartodoocho;
 
 	int hash(int n){
 		return n&( (1 << globaldepth) - 1);
 	}
 
 	void split(int bucket_num){
-
+		parartodocuatro.lock();
 		int localdepth = buckets[bucket_num]->getdepth();
 		if (globaldepth == localdepth)
 			Doubledirectory();
@@ -170,9 +179,12 @@ class Directory{
 		for(int i = mirrorindex - num; i >=0 ; i -= num)
 			buckets[i] = buckets[mirrorindex];
 		reinsert(bucket_num);
+		parartodocuatro.unlock();
+
 	}
 
 	void reinsert(int bucket_num){
+		parartodocinco.lock();
 		vector <Alumno*> temp;
 		buckets[bucket_num]->copy(temp);
 		for(int i = 0; i < temp.size(); i++){
@@ -184,6 +196,7 @@ class Directory{
 				buckets[bucket_num]->insert(key);
 			}
 		}
+		parartodocinco.unlock();
 	}
 
 	void Doubledirectory(){
@@ -224,7 +237,7 @@ class Directory{
 	}
 
 	void insert(Alumno* key){
-
+		parartodoseis.lock();
 		int bucket_num = hash(stoi(key->getDni()));
 		int banderita = buckets[bucket_num]->insert(key);
 		if (banderita == -1){
@@ -238,15 +251,19 @@ class Directory{
 		else{
 			cout << key << " insertado " << bucket_num << endl;
 		}
+		parartodoseis.unlock();
+
 
 	}
 	void del(string dni){
+		parartodosiete.lock();
 		int bucket_num = hash(stoi(dni));
 		buckets[bucket_num]->del(dni);
+		parartodosiete.unlock();
 	}
 
 	void search(string dni){
-
+		parartodoocho.lock();
 		int bucket_num = hash(stoi(dni));
 		int banderita = buckets[bucket_num]->search(dni);
 		if (banderita == 1){
@@ -255,6 +272,8 @@ class Directory{
 		else{
 			cout << dni << " no existe " << endl;
 		}
+		parartodoocho.unlock();
+
 	}
 
 	void display(){
@@ -270,153 +289,77 @@ class Directory{
 	}
 };
 
-/*
-void Directory :: del(string key){
-	int bucket_num = hash(stoi(key));
-	buckets[bucket_num]->del(key);
-}*/
-
-/*
-int Directory :: hash (int n){
-	return n&( (1 << globaldepth) - 1);
-}*/
-
-/*
-void Directory :: Doubledirectory(){
-	for(int i = 0; i < (1 << globaldepth); i++)
-		buckets.push_back(buckets.at(i));
-	this->globaldepth++;
-	//cout << "line 94 " << this->globaldepth << endl;;
-}*/
-
-/*
-void Directory :: reinsert(int bucket_num){
-	vector <Alumno*> temp;
-	buckets[bucket_num]->copy(temp);
-	for(int i = 0; i < temp.size(); i++){
-		Alumno* key = temp.at(i);
-		int bucket_num  = hash(stoi(key->getDni()));
-		//cout << "new bucket_num" << bucket_num << endl;
-		int banderita = buckets[bucket_num]->insert(key);
-		if (banderita == -1){
-			split(bucket_num);
-			buckets[bucket_num]->insert(key);
-		}
-	}
-}*/
-
-/*
-void Directory :: split(int bucket_num){
-	int localdepth = buckets[bucket_num]->getdepth();
-	//cout << globaldepth << " " << localdepth << endl;
-	if (globaldepth == localdepth)
-		Doubledirectory();
-	int mirrorindex = bucket_num ^ (1 << localdepth);
-	buckets[bucket_num]->increasedepth();
-	localdepth++;
-	//cout << buckets[bucket_num]->getdepth() << endl;
-	buckets[mirrorindex] = new Bucket(localdepth, bucketsize);
-	int num = 1 << localdepth;
-	for(int i = mirrorindex + num; i < (1 << globaldepth); i += num)
-		buckets[i] = buckets[mirrorindex];
-	for(int i = mirrorindex - num; i >=0 ; i -= num)
-		buckets[i] = buckets[mirrorindex];
-	reinsert(bucket_num);
-}*/
-
-/*
-void Directory :: insert(Alumno* key){
-	int bucket_num = hash(stoi(key->getDni()));
-	int banderita = buckets[bucket_num]->insert(key);
-	if (banderita == -1){
-        cout << "splitting bucketnum " << bucket_num << endl;
-		split(bucket_num);
-		insert(key);
-	}
-	else if (banderita == 0){
-		cout << "Key already exists" << endl;
-	}
-	else{
-		cout << key << " inserted in bucket having number " << bucket_num << endl;
-	}
-}*/
-
-/*
-void Directory :: search (string dni){
-	int bucket_num = hash(stoi(dni));
-	int banderita = buckets[bucket_num]->search(dni);
-	if (banderita == 1){
-		cout << dni << " exists in bucket number " << bucket_num <<  endl;
-	}
-	else{
-		cout << dni << " doesnot exist " << endl;
-	}
-}*/
-/*
-void Directory :: display(){
-    set <Bucket*> s;
-	for(int i = 0; i < (1 << globaldepth); i++){
-        if (s.find(buckets[i]) != s.end())
-            continue;
-		cout << i << ": ";
-		buckets[i]->display();
-        s.insert(buckets[i]);
-	}
-}*/
-
-/*
-void Directory :: leerAlumnos(string file) {
-    ifstream archivo(file);
-    if (archivo.is_open()) {
-        string campos[5], fila;
-        getline(archivo, fila);
-        while (!archivo.eof()) {
-            getline(archivo, fila);
-            istringstream stringStream(fila);
-            uint contador = 0;
-            while (getline(stringStream, fila, '|')) {
-                campos[contador] = fila;
-                contador++;
-            }
-            Alumno* alumno = new Alumno(campos[0], campos[1], campos[2], campos[3], stof(campos[4]));
-            insert(alumno);
-            cout << endl;
-        }
-    }
-}*/
-
 int main(){
 	int globaldepth, bucket_size;
-	cin >> globaldepth >> bucket_size;
+	cout << "Ingresa la profundidad global: \n";
+	cin >> globaldepth;
+	cout << "Ingresa el tamaño del bucket: \n";
+	cin >> bucket_size;
 	Directory d(globaldepth, bucket_size);
-	d.leerAlumnos("Alumnos.txt");
+	thread principal(&Directory::leerAlumnos, &d, "Alumnos.txt");
+	principal.join();
+	//d.leerAlumnos("Alumnos.txt");
 	int opcion;
+	cout << "Ingrese la opcion: \n-1: salir\n 1: mostrar registros\n 2: insertar registro\n 3: buscar un registro\n 4: eliminar registro\n";
 	cin >> opcion;
+	std::chrono::time_point<std::chrono::system_clock> start, end;
 	while(opcion != -1){
 		if (opcion == 3){
 			string key ;
 			cin>>key;
-			d.search(key);
+			auto start = chrono::steady_clock::now();
+			thread t0(&Directory::search, &d, key);
+			t0.join();
+			//d.search(key);
+			auto end = chrono::steady_clock::now();
+			cout << chrono::duration_cast<chrono::microseconds>(end - start).count() << " microsec";
 		}
 		else if (opcion == 4){
 			string key;
 			cin>>key;
-			d.del(key);
+			thread t1(&Directory::del, &d, key);
+			t1.join();
+			//d.del(key);
 		}
-		else if (opcion == 5){
-            d.display();
+		else if (opcion == 1){
+			thread t3(&Directory::display, &d);
+			t3.join();
+            //d.display();
 		}
-		else if(opcion == 6){
-			string Dni; cin >> Dni;
-			string Nombre; cin >> Nombre;
-			string Apellidos; cin >> Apellidos;
-			string Carrera; cin >> Carrera;
-			float Mensualidad; cin >> Mensualidad;
+		else if(opcion == 2){
+			string Dni;
+			cout << "Ingrese el dni" ; cin >> Dni;
+			string Nombre;
+			cout << "Ingrese el nombre"; cin >> Nombre;
+			string Apellidos;
+			cout << "Ingrese el apellido"; cin >> Apellidos;
+			string Carrera; 
+			cout << "Ingrese la carrera"; cin >> Carrera;
+			float Mensualidad;
+			cout << "Ingrese la mensualidad"; cin >> Mensualidad;
 			Alumno* alumno = new Alumno(Dni, Nombre, Apellidos, Carrera, Mensualidad);
-			d.insert(alumno);
+			auto start = chrono::steady_clock::now();
+			thread t2(&Directory::insert, &d, alumno);
+			t2.join();
+			//d.insert(alumno);
+			auto end = chrono::steady_clock::now();
+			cout << chrono::duration_cast<chrono::microseconds>(end - start).count() << " microsec";
 		}
+		cout << "Ingrese la opcion: \n-1: salir\n 1: mostrar registros\n 2: insertar registro\n 3: buscar un registro\n 4: eliminar registro\n";
 		cin >> opcion;
 	}
+
+	
+   
+
+    chrono::duration<double> elapsed_seconds = end-start;
+    time_t end_time = chrono::system_clock::to_time_t(end);
+
+    cout<<"finished computation at"<<ctime(&end_time)<<endl;
+    cout<<"elapsed time:"<< elapsed_seconds.count() <<"s\n";
+
+
+	return 0;
 
 }
 

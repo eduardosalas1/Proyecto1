@@ -6,7 +6,7 @@
 ## Introducción
 El objetivo del proyecto es poner en práctica técnicas de organización de archivos implementadas para poder comparar su eficiencia y velocidad.
  
-Los datos usados para este proyecto son una elaboración propia. Diseñamos un algoritmo para poder crear dnis, nombres, apellidos, carreras y mensualidades aleatorias. En total emplearemos 300 datos.
+Los datos usados para este proyecto son una elaboración propia. Diseñamos un algoritmo para poder crear dnis, nombres, apellidos, carreras y mensualidades aleatorias. En total emplearemos 100 datos.
 
 En este trabajo se espera poder implementar correctamente dos técnicas de organización de archivos y experimentar con ambas estructuras para poder decidir cual es la mas optima para nuestra base de datos.
 
@@ -46,11 +46,7 @@ También cuenta con métodos públicos:
 
     - leerAlumnos(string file) : Lee el archivo e inserta los registros en un vector de Alumno.
 
-<<<<<<< HEAD
-    - insert(Alumno* key) : Inserta el alumno enviado como parámetro. Si es que el bucket está lleno llama a la función split, si ya existe manda un mensaje a consola 
-=======
     - insert(Alumno* key) : Inserta el alumno recibido como parámetro. Si este ya existe, entonces manda un mensaje a consola indicando esto. Si el bucket en donde debe ser insertado está lleno, entonces llama a la función split y luego lo inserta. Finalmente, si el alumno recibido no está registrado aún y hay espacio en su bucket respectivo, entonces lo inserta.
->>>>>>> cbd6c58c1750699c998da08795f6141ca8de7ac9
 
     - del(string dni) : Elimina el registro cuyo dni coincide con el ingresado
 
@@ -87,23 +83,24 @@ Por otro lado, la clase SequentialFile cuenta con múltiples métodos que serán
     - joinFiles(Alumno&): Une y ordena los archivos en uno solo.
 
 
-## Resultados experimentales
+## Pruebas y Resultados experimentales
 
-
-## Pruebas
+La simulación de transacciones será realizada de manera manual en la misma presentación para cada estructura de datos, cada metodo sera realizado en un nuevo hilo.
+A continuación explicaremos en que consiste cada transacción a realizar en la Base de datos para cada estructura de datos.
 
 ### Extendible Hashing
 
 En el EH probaremos corriendo una base de datos universitaria basica de formato .dat, escogiendo principalmente el global depth y el bucket_size = Cuanto aguantara maximo por bucket antes de hacer split, luego aumentara el local depth del bucket partido.
 Se escogera manualmente en el terminal una de las opciones, primero tendremos buscar por medio del Dni, luego tenemos la opcion de delete por medio igualmente de Dni, tambien tenemos la opcion de imprimir los datos de las personas, por ultimo la opcion de introducir un nuevo alumno, ingresando los parametros de la clase Alumno de forma manual.
 
+![Grafica Extendible y Sequential](source/Grafica.png)
+
+
 ### Sequential File
 
 En el caso de Sequential File generaremos una data con datos reales y apartir de eso iremos insertando y añadiendo alumnos desde el main para que se pueda ir llenando el auxiliar file y sucesivamente observar como se concatena todo en un solo archivo. Adicional a esto borraremos alumnos con nuestra
 función deletion y nos percataremos de que el puntero siguiente cambia de valor a cero. Por último, buscaremos un alumno gracias a la posicion que nos brindará el search (binary search).
 
+## Conclusión
 
-FALTA:
--Threads.
--FUncion de tiempo.
--Comparar promedio de tiempos de ambas estructuras.
+En conclusión, analizando las tablas comparativas se pudo plantear la solucion optima al problema de la organizacion de los archivos de esta base de datos siendo el Extendible Hashing un método más efectivo y rápido.

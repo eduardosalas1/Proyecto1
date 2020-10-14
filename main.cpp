@@ -77,18 +77,44 @@ int main(){
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 */
-    chrono::time_point<chrono::system_clock> start,end;
-
     string filename = "Alumnos.dat";
 
     Alumno alumno1("99999999", "Eduardo", "Salas Palacios", "CS", 2000.45);
     Alumno alumno2("69696969","Andrea","Aguirre","CS",3000);
 
     SequentialFile sf(filename);
-    //sf.insertAll();
-    thread t0(&SequentialFile::insertAll, &sf);
-    t0.join();
 
+    sf.insertAll();
+    
+    sf.add(alumno1);
+
+    auto start = chrono::steady_clock::now();
+    sf.Search(57301492,true);
+	auto end = chrono::steady_clock::now();
+
+    cout<<chrono::duration_cast<chrono::microseconds>(end - start).count() << " microsec"<<endl;
+
+
+    //thread t0(&SequentialFile::insertAll, &sf);
+    //t0.join();
+
+    
+
+    
+
+    
+   // sf.add(alumno1);
+
+    
+   // sf.Search(99999999,true);
+
+    
+
+  
+
+   
+
+/*
     thread taux(&SequentialFile::add, &sf, alumno1);
     taux.join();
     //sf.add(alumno1);
@@ -124,7 +150,7 @@ int main(){
     file>>temp;
 
     cout<<temp.next;
-
+*/
 
     return 0;
 
