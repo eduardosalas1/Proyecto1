@@ -105,8 +105,9 @@ función deletion y nos percataremos de que el puntero siguiente cambia de valor
 A continuacion veremos los resultados de nuestras operaciones de search y add, en ambas estructuras de forma comparativa. 
 
 
-    ![Grafica Extendible y Sequential Search](source/WhatsApp Image 2020-10-13 at 10.52.42 PM (1).jpeg)
+![Grafica Extendible Search](source/search.jpeg)
 
+![Grafica Extendible Add](source/add.jpeg)
 
 *Tiempos en microsegundos.
 
